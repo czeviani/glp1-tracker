@@ -1,12 +1,29 @@
-import { BodyMeasurement } from "@/types";
+import { getDeviceStatus } from "@/lib/tuya";
+import { BodyMeasurement, TuyaDeviceStatus } from "@/types";
 import MetricCard from "./MetricCard";
 
+function mapStatusToMeasurement(statuses: TuyaDeviceStatus[]): Partial<BodyMeasurement> {
+  const map: Record<string, number> = {};
+  for (const s of statuses) map[s.code] = Number(s.value);
+  return {
+    timestamp: Date.now(),
+    weight: (map["weight"] ?? 0) / 100,
+    bmi: (map["bmi"] ?? 0) / 10,
+    bodyFat: (map["body_fat"] ?? 0) / 10,
+    muscleMass: (map["muscle_mass"] ?? 0) / 100,
+    boneMass: (map["bone_mass"] ?? 0) / 100,
+    waterContent: (map["water_content"] ?? 0) / 10,
+    visceralFat: map["visceral_fat"] ?? 0,
+    basalMetabolism: map["basal_metabolism"] ?? 0,
+  };
+}
+
 async function fetchMeasurement(): Promise<Partial<BodyMeasurement> | null> {
+  const deviceId = process.env.TUYA_DEVICE_ID;
+  if (!deviceId || !process.env.TUYA_ACCESS_ID) return null;
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/measurements`, { next: { revalidate: 60 } });
-    if (!res.ok) return null;
-    return res.json();
+    const statuses = await getDeviceStatus(deviceId);
+    return mapStatusToMeasurement(statuses);
   } catch {
     return null;
   }
