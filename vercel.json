@@ -1,0 +1,13 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "env": {
+    "TUYA_ACCESS_ID": "@tuya_access_id",
+    "TUYA_CLIENT_SECRET": "@tuya_client_secret",
+    "TUYA_BASE_URL": "@tuya_base_url",
+    "TUYA_USER_UID": "@tuya_user_uid",
+    "TUYA_DEVICE_ID": "@tuya_device_id"
+  }
+}
